@@ -5,25 +5,33 @@ import { Text, StyleSheet, View, TextInput, ScrollView, Image, TouchableHighligh
 import TitleHeading from './components/TitleHeading';
 //import SearchBar from './components/SearchBar';
 
+/*
+TODO:
+- Investigate logless crashing on Android
+- Catch 'null values from API return and display a TOAST message
+- Add favorites scene
+- 'Add to favorites' through TouchableHighlight and function addFavorites
+*/
+
 export default function App() {
 
     const apikey = "http://www.omdbapi.com/?i=tt3896198&apikey=ec5209be"
 
     const [state, setState] = useState({
         s: "Enter A Movie Title",
-        results: [],
+        movieList: [],
         selected: {}
     });
 
     // Use Axios to make a call to the apikey with new queery for searching through the database using the search term set in state.s
     const search = () => {
         axios(apikey + "&s=" + state.s).then(({ data }) => {
-          // Create a variable called results to handle the returned data from the queery
+          // Create a variable called movieList to handle the returned data from the queery
           // Capital 'S' on Search due to what the API returns (thank you blessed POSTMAN)
-            let results = data.Search
-            // Set the state back to prev state and set results TO the result
+            let movieList = data.Search
+            // Set the state back to prev state and set movieList TO the movie
             setState(prevState => {
-              return{...prevState, results: results }
+              return{...prevState, movieList: movieList }
             })
         }) 
     }
@@ -42,21 +50,21 @@ export default function App() {
           />
 
       <StatusBar style="auto" />
-      <ScrollView style={styles.results}>
-          {state.results.map(result => (
+      <ScrollView style={styles.movieList}>
+          {state.movieList.map(movie => (
             <TouchableHighlight 
-            key={result.imdbID} 
-            onPress={() => openPopup(result.imdbID)}>
-            <View style={styles.result}>
+            key={movie.imdbID} 
+            onPress={() => addFavorites(movie.imdbID)}>
+            <View style={styles.movie}>
               <Image
-                source={{ uri: result.Poster}}
+                source={{ uri: movie.Poster}}
                 style={{
                   width: 300,
                   height: 300,
                 }}
                 resizeMode="cover"
               />
-              <Text style={styles.header}>{result.Title}</Text>
+              <Text style={styles.header}>{movie.Title}</Text>
             </View>
             </TouchableHighlight>
           ))}
@@ -82,10 +90,10 @@ const styles = StyleSheet.create({
         margin: 40,
         borderRadius: 8
     },
-    results:{
+    movieList:{
       flex: 1,
     },
-    result: {
+    movie: {
       flex: 1,
       width: "100", 
       marginBottom: 20,
